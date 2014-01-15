@@ -275,7 +275,7 @@ nets = dict(
         CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'casinocoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/casinocoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.casinocoin'), 'casinocoin.conf'),
         BLOCK_EXPLORER_URL_PREFIX='http://casinocoin.mooo.com/block/',
         ADDRESS_EXPLORER_URL_PREFIX='http://casinocoin.mooo.com/address/',
-		TX_EXPLORER_URL_PREFIX='http://casinocoin.mooo.com/transaction/',
+	TX_EXPLORER_URL_PREFIX='http://casinocoin.mooo.com/transaction/',
         SANE_TARGET_RANGE=(2**256//100000000 - 1, 2**256//1000 - 1),
         DUMB_SCRYPT_DIFF=2**16,
         DUST_THRESHOLD=1e8,
@@ -448,7 +448,196 @@ nets = dict(
         DUMB_SCRYPT_DIFF=2**16,
         DUST_THRESHOLD=0.03e8,
     ),
+    dubstepcoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'),
+        P2P_PORT=62030,
+        ADDRESS_VERSION=29,
+        RPC_PORT=62040,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'dubstepcoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 200*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=180, # s
+        SYMBOL='WUBS',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'DubstepCoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Dubstepcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.dubstepcoin'), 'dubstepcoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://wub.info/block/', #dummy for now
+        ADDRESS_EXPLORER_URL_PREFIX='http://wub.info/address/',
+        TX_EXPLORER_URL_PREFIX='http://wub.info/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    monacoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'), #pchmessagestart
+        P2P_PORT=9401,
+        ADDRESS_VERSION=50, #pubkey_
+        RPC_PORT=9402,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'monacoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 50*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=90, # s
+        SYMBOL='MONA',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'monacoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Monacoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.monacoin'), 'monacoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://monacoin.org/crawler/block_crawler.php?block_hash=',
+        ADDRESS_EXPLORER_URL_PREFIX='http://monacoin.org/crawler/block_crawler.php?address=',  #dummy for now, not supported by explorer
+        TX_EXPLORER_URL_PREFIX='http://monacoin.org/crawler/block_crawler.php?transaction=',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    luckycoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'),
+        P2P_PORT=9917,
+        ADDRESS_VERSION=47,
+        RPC_PORT=9918,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'luckycoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 88*100000000 >> (height + 1)//1036800,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=60,
+        SYMBOL='LKY',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Luckycoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Luckycoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.luckycoin'), 'luckycoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://d.evco.in/abe/block/',
+        ADDRESS_EXPLORER_URL_PREFIX='http://d.evco.in/abe/address/',
+        TX_EXPLORER_URL_PREFIX='http://d.evco.in/abe/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    giftcoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'),
+        P2P_PORT=8854,
+        ADDRESS_VERSION=39,
+        RPC_PORT=8855,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'giftcoinaddress' in (yield bitcoind.rpc_help()) and 
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 50*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=300,
+        SYMBOL='GFT',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Giftcoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Giftcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.giftcoin'), 'giftcoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://giftchain.info/block/', #dummy for now
+        ADDRESS_EXPLORER_URL_PREFIX='http://giftchain.info/address/',
+        TX_EXPLORER_URL_PREFIX='http://giftchain.info/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
 
+    ),
+    pesetacoin=math.Object(
+        P2P_PREFIX='c0c0c0c0'.decode('hex'),
+        P2P_PORT=16639,
+        ADDRESS_VERSION=47,
+        RPC_PORT=16638,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'pesetacoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 166386*100000 >> (height + 1)//840000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=60, # s
+        SYMBOL='PTC',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'Pesetacoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/Pesetacoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.pesetacoin'), 'pesetacoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://pesetacoin.info/block/', #dummy
+        ADDRESS_EXPLORER_URL_PREFIX='http://pesetacoin.info/address/',
+        TX_EXPLORER_URL_PREFIX='http://pesetacoin.info/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    lennycoin=math.Object(
+        P2P_PREFIX='c0c0c0c0'.decode('hex'),
+        P2P_PORT=62556,
+        ADDRESS_VERSION=8,
+        RPC_PORT=62555,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'lennycoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 100*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=180, # s
+        SYMBOL='LENNY',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'lennycoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/lennycoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.lennycoin'), 'lennycoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://lennycoin.info/block/', #dummy
+        ADDRESS_EXPLORER_URL_PREFIX='http://lennycoin.info/address/',
+        TX_EXPLORER_URL_PREFIX='http://lennycoin.info/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    coinye=math.Object(
+        P2P_PREFIX='f9f7c0e8'.decode('hex'),
+        P2P_PORT=41338,
+        ADDRESS_VERSION=11,
+        RPC_PORT=41337,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'coinyecoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 666666*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=90, # s
+        SYMBOL='COYE',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'coinyecoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/coinyecoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.coinyecoin'), 'coinyecoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://coinyechain.info/block/',
+        ADDRESS_EXPLORER_URL_PREFIX='http://coinyechain.info/address/',
+        TX_EXPLORER_URL_PREFIX='http://coinyechain.info/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    aliencoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'), #pchmessagestart
+        P2P_PORT=52112,
+        ADDRESS_VERSION=23, #pubkey_address
+        RPC_PORT=52111,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'aliencoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 40*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=30, # s
+        SYMBOL='ALN',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'aliencoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/aliencoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.aliencoin'), 'aliencoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://cryptexplorer.com/block/',
+        ADDRESS_EXPLORER_URL_PREFIX='http://cryptexplorer.com/address/',
+        TX_EXPLORER_URL_PREFIX='http://cryptexplorer.com/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
+    usde=math.Object(
+        P2P_PREFIX='d9d9f9bd'.decode('hex'), #pchmessagestart
+        P2P_PORT=54449,
+        ADDRESS_VERSION=38, #pubkey_address
+        RPC_PORT=54448,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'usdeaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 1000*100000000 if height>1000 else 100*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=60, # s
+        SYMBOL='USDe',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'usde') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/usde/') if platform.system() == 'Darwin' else os.path.expanduser('~/.usde'), 'usde.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://usdeexplorer.com/block/', #dummy
+        ADDRESS_EXPLORER_URL_PREFIX='http://usdeexplorer.com/address/',
+        TX_EXPLORER_URL_PREFIX='http://usdeexplorer.com/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.03e8,
+    ),
 )
 for net_name, net in nets.iteritems():
     net.NAME = net_name
