@@ -638,6 +638,91 @@ nets = dict(
         DUMB_SCRYPT_DIFF=2**16,
         DUST_THRESHOLD=0.03e8,
     ),
+    rpcoin=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'), #pchmessagestart
+        P2P_PORT=9027,
+        ADDRESS_VERSION=60, #pubkey_address
+        RPC_PORT=9026,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'ronpaulcoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 1*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=120, # s
+        SYMBOL='RPC',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'ronpaulcoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/ronpaulcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.ronpaulcoin'), 'ronpaulcoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://cryptexplorer.com/block/',
+        ADDRESS_EXPLORER_URL_PREFIX='http://cryptexplorer.com/address/',
+        TX_EXPLORER_URL_PREFIX='http://cryptexplorer.com/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0,
+    ),
+    polcoin=math.Object(
+        P2P_PREFIX='a5725982'.decode('hex'), #pchmessagestart
+        P2P_PORT=9338,
+        ADDRESS_VERSION=0, #pubkey_address
+        RPC_PORT=9337,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'polcoinaddress' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 50*100000000 >> (height + 1)//210000,
+        POW_FUNC=data.hash256,
+        BLOCK_PERIOD=60, # s
+        SYMBOL='PLC',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'polcoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/polcoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.polcoin'), 'polcoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://plcexplorer.com/block/', #dummy
+        ADDRESS_EXPLORER_URL_PREFIX='http://plcexplorer.com/address/',
+        TX_EXPLORER_URL_PREFIX='http://plcexplorer.com/tx/',
+        SANE_TARGET_RANGE=(2**256//2**32//1000 - 1, 2**256//2**32 - 1),
+        DUMB_SCRYPT_DIFF=1,
+        DUST_THRESHOLD=0.001e8,
+    ),
+    coin42=math.Object(
+        P2P_PREFIX='fbc0b6db'.decode('hex'), #pchmessagestart
+        P2P_PORT=24242,
+        ADDRESS_VERSION=8, #pubkey_address
+        RPC_PORT=4242,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            '42address' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 0.00004200*100000000 if height>420 else 0.00000010*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=42, # s
+        SYMBOL='42c',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], '42') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/42/') if platform.system() == 'Darwin' else os.path.expanduser('~/.42'), '42.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://altexplorer.net/block/',
+        ADDRESS_EXPLORER_URL_PREFIX='http://altexplorer.net/address/',
+        TX_EXPLORER_URL_PREFIX='http://altexplorer.net/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0,
+    ),
+    foxcoin=math.Object(
+        P2P_PREFIX='fcd9b7dd'.decode('hex'), #pchmessagestart
+        P2P_PORT=9929,
+        ADDRESS_VERSION=136, #pubkey_address
+        RPC_PORT=9919,
+        RPC_CHECK=defer.inlineCallbacks(lambda bitcoind: defer.returnValue(
+            'FoxCoin' in (yield bitcoind.rpc_help()) and
+            not (yield bitcoind.rpc_getinfo())['testnet']
+        )),
+        SUBSIDY_FUNC=lambda height: 250*100000000,
+        POW_FUNC=lambda data: pack.IntType(256).unpack(__import__('ltc_scrypt').getPoWHash(data)),
+        BLOCK_PERIOD=60, # s
+        SYMBOL='FOX',
+        CONF_FILE_FUNC=lambda: os.path.join(os.path.join(os.environ['APPDATA'], 'FoxCoin') if platform.system() == 'Windows' else os.path.expanduser('~/Library/Application Support/FoxCoin/') if platform.system() == 'Darwin' else os.path.expanduser('~/.FoxCoin'), 'FoxCoin.conf'),
+        BLOCK_EXPLORER_URL_PREFIX='http://altexplorer.net/block/', #dummy
+        ADDRESS_EXPLORER_URL_PREFIX='http://altexplorer.net/address/',
+        TX_EXPLORER_URL_PREFIX='http://altexplorer.net/tx/',
+        SANE_TARGET_RANGE=(2**256//1000000000 - 1, 2**256//1000 - 1),
+        DUMB_SCRYPT_DIFF=2**16,
+        DUST_THRESHOLD=0.00001,
+    ),
+
 )
 for net_name, net in nets.iteritems():
     net.NAME = net_name
