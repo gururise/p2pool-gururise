@@ -345,8 +345,6 @@ class Share(object):
         return [known_txs[tx_hash] for tx_hash in other_tx_hashes]
     
     def should_punish_reason(self, previous_block, bits, tracker, known_txs):
-        if (self.header['previous_block'], self.header['bits']) != (previous_block, bits) and self.header_hash != previous_block and self.peer_addr is not None:
-            return True, 'Block-stale detected! height(%x) < height(%x) or %08x != %08x' % (self.header['previous_block'], previous_block, self.header['bits'].bits, bits.bits)
         
         if self.pow_hash <= self.header['bits'].target:
             return -1, 'block solution'
@@ -430,7 +428,7 @@ class OkayTracker(forest.Tracker):
         try:
             share.check(self)
         except:
-            log.err(None, 'Share check failed:')
+            log.err(None, 'Share check failed: %064x -> %064x' % (share.hash, share.previous_hash if share.previous_hash is not None else 0))
             return False
         else:
             self.verified.add(share)
@@ -438,21 +436,21 @@ class OkayTracker(forest.Tracker):
     
     def think(self, block_rel_height_func, previous_block, bits, known_txs):
         desired = set()
+        bad_peer_addresses = set()
         
         # O(len(self.heads))
         #   make 'unverified heads' set?
         # for each overall head, attempt verification
         # if it fails, attempt on parent, and repeat
         # if no successful verification because of lack of parents, request parent
-        bads = set()
+        bads = []
         for head in set(self.heads) - set(self.verified.heads):
             head_height, last = self.get_height_and_last(head)
             
             for share in self.get_chain(head, head_height if last is None else min(5, max(0, head_height - self.net.CHAIN_LENGTH))):
                 if self.attempt_verify(share):
                     break
-                if share.hash in self.heads:
-                    bads.add(share.hash)
+                bads.append(share.hash)
             else:
                 if last is not None:
                     desired.add((
@@ -463,10 +461,16 @@ class OkayTracker(forest.Tracker):
                     ))
         for bad in bads:
             assert bad not in self.verified.items
-            assert bad in self.heads
+            #assert bad in self.heads
+            bad_share = self.items[bad]
+            if bad_share.peer_addr is not None:
+                bad_peer_addresses.add(bad_share.peer_addr)
             if p2pool.DEBUG:
                 print "BAD", bad
-            self.remove(bad)
+            try:
+                self.remove(bad)
+            except NotImplementedError:
+                pass
         
         # try to get at least CHAIN_LENGTH height for each verified head, requesting parents if needed
         for head in list(self.verified.heads):
@@ -527,7 +531,7 @@ class OkayTracker(forest.Tracker):
             for peer_addr, hash, ts, targ in desired:
                 print '   ', None if peer_addr is None else '%s:%i' % peer_addr, format_hash(hash), math.format_dt(time.time() - ts), bitcoin_data.target_to_difficulty(targ), ts >= timestamp_cutoff, targ <= target_cutoff
         
-        return best, [(peer_addr, hash) for peer_addr, hash, ts, targ in desired if ts >= timestamp_cutoff], decorated_heads
+        return best, [(peer_addr, hash) for peer_addr, hash, ts, targ in desired if ts >= timestamp_cutoff], decorated_heads, bad_peer_addresses
     
     def score(self, share_hash, block_rel_height_func):
         # returns approximate lower bound on chain's hashrate in the last self.net.CHAIN_LENGTH*15//16*self.net.SHARE_PERIOD time
